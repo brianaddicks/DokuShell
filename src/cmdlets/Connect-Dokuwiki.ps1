@@ -34,9 +34,9 @@ function Connect-Dokuwiki {
 			
 			$global:Dokuwiki = New-Object DokuShell.Server
 			
-			$global:Dokuwiki.Host   = $Host
-			$global:Dokuwiki.Port   = $Port
-			$global:Dokuwiki.Device = $Device
+            $global:Dokuwiki.Protocol = $Protocol
+			$global:Dokuwiki.Host     = $Host
+			$global:Dokuwiki.Port     = $Port
 
             $UserName = $Credential.UserName
             $Password = $Credential.getnetworkcredential().password
@@ -47,6 +47,23 @@ function Connect-Dokuwiki {
 
     PROCESS {
         
+        $Params = @()
+        $Params += New-RpcParameter $UserName
+        $Params += New-RpcParameter $Password
+
+        $MethodCall = New-RpcMethodCall "dokuwiki.login" $Params
+
+        $RestParams  = @{}
+        $RestParams += @{'Uri'             = $Global:DokuWiki.ApiUrl }
+        $RestParams += @{'Body'            = $MethodCall.PrintPlainXml() }
+        $RestParams += @{'ContentType'     = 'xml' }
+        $RestParams += @{'Method'          = 'post' }
+        $RestParams += @{'SessionVariable' = "Global:MySession" }
+
+        $Login = Invoke-RestMethod @RestParams
+
+        return $Login
+
         <#
         
         $QueryStringTable = @{ type = "op"
@@ -75,9 +92,10 @@ function Connect-Dokuwiki {
 
         #$global:PaDeviceObject = $PaDeviceObject
 
-		#>
+		
 		if (!$Quiet) {
 			return $global:Dokuwiki
 		}
+        #>
     }
 }

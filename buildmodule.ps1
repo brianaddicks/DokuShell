@@ -140,7 +140,6 @@ foreach ($f in $(ls $CsPath)) {
 
         if ($AddContent) {
             $CSharpContent += $l
-            write-verbose $l
         }
     }
 }
