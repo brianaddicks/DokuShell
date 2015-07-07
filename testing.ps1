@@ -10,4 +10,8 @@ if ($PushToStrap) {
 } else {
     & ".\buildmodule.ps1"
 }
+
 ipmo .\*.psd1
+
+$PaPass  = $PaPass | ConvertTo-SecureString -AsPlainText -force
+$PaCred  = New-Object System.Management.Automation.PSCredential $PaUser,$PaPass

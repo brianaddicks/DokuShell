@@ -148,12 +148,12 @@ foreach ($f in $(ls $CsPath)) {
 #$Assemblies | Select -Unique | sort -Descending
 
 $CSharpOutput  = $Assemblies | Select -Unique | sort -Descending
-$CSharpOutput += 'namespace PowerAlto {'
+$CSharpOutput += 'namespace DokuShell {'
 $CSharpOutput += $CSharpContent
 $CSharpOutput += '}'
 
 $CsOutput += [string]::join("`n",$CSharpOutput)
-#$CsOutput | Out-File $CsOutputFile -Force
+$CsOutput | Out-File $CsOutputFile -Force
 
 
 Add-Type -ReferencedAssemblies @(

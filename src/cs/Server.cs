@@ -75,12 +75,8 @@ namespace DokuShell {
 
         public string UrlBuilder(string QueryString) {
 
-            string[] Pieces = new string[5];
+            string[] Pieces = new string[1];
             Pieces[0] = this.ApiUrl;
-
-            //if (QueryType == "op") {
-            //  Pieces[5] += ("&cmd=" + Query);
-            //}
 
             string CompletedString = string.Join( "", Pieces );
 
