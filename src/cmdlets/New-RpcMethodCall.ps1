@@ -8,7 +8,7 @@
 		[string]$MethodName,
 
 		[Parameter(Mandatory=$False,Position=1)]
-		$RpcParameters
+		[array]$RpcParameters
 	)
 
     PROCESS {
@@ -20,7 +20,8 @@
         
         foreach ($p in $RpcParameters) {
             Write-Verbose "New-RpcMethodCall: $($p.DataType): $($p.Value)"
-            
+            Write-Verbose $p.Gettype()
+            #$NewRpcMethodCall.Parameters += $p
         }
 
         $NewRpcMethodCall.Parameters = $RpcParameters
