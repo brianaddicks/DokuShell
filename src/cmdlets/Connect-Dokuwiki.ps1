@@ -50,6 +50,7 @@ function Connect-Dokuwiki {
         $Params = @()
         $Params += New-RpcParameter $UserName
         $Params += New-RpcParameter $Password
+        $global:params = $Params
 
         $MethodCall = New-RpcMethodCall "dokuwiki.login" $Params
 
@@ -62,40 +63,10 @@ function Connect-Dokuwiki {
 
         $Login = Invoke-RestMethod @RestParams
 
-        return $Login
-
-        <#
         
-        $QueryStringTable = @{ type = "op"
-                               cmd  = "<show><system><info></info></system></show>" }
 
-        $QueryString = HelperCreateQueryString $QueryStringTable
-        Write-Debug "QueryString: $QueryString"
-		$url         = $global:PaDeviceObject.UrlBuilder($QueryString)
-        Write-Debug "URL: $Url"
-
-		try   { $QueryObject = $global:PaDeviceObject.HttpQuery($url) } `
-        catch {	throw $_.Exception.Message       	           }
-
-        $Data = HelperCheckPaError $QueryObject
-		$Data = $Data.system
-
-        $global:PaDeviceObject.Name            = $Data.hostname
-        $global:PaDeviceObject.Model           = $Data.model
-        $global:PaDeviceObject.Serial          = $Data.serial
-        $global:PaDeviceObject.OsVersion       = $Data.'sw-version'
-        $global:PaDeviceObject.GpAgent         = $Data.'global-protect-client-package-version'
-        $global:PaDeviceObject.AppVersion      = $Data.'app-version'
-        $global:PaDeviceObject.ThreatVersion   = $Data.'threat-version'
-        $global:PaDeviceObject.WildFireVersion = $Data.'wildfire-version'
-        $global:PaDeviceObject.UrlVersion      = $Data.'url-filtering-version'
-
-        #$global:PaDeviceObject = $PaDeviceObject
-
-		
 		if (!$Quiet) {
-			return $global:Dokuwiki
+			return $Login
 		}
-        #>
     }
 }

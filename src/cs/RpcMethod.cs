@@ -20,7 +20,18 @@ namespace DokuShell {
 	
 	public class RpcMethod {
 		public string Name;
-		public List<RpcParam> Parameters { get; set; }
+		
+		private List<RpcParam> parameters;
+		public List<RpcParam> Parameters {
+			get { return this.parameters; }
+			set {
+					this.parameters = new List<RpcParam>();
+				foreach (RpcParam member in value) {
+					this.parameters.Add(member);
+				}
+				//this.parameters = value;
+			}
+		}
 		
 		//public XElement Xml () {
 		public XDocument Xml() {
@@ -63,8 +74,6 @@ namespace DokuShell {
 			
 			string CompletedString = string.Join("\n", Pieces);
 			return CompletedString;
-			
-			//return Xml().ToString();
 		}
 
 		public string PrintPlainXml() {
@@ -74,8 +83,6 @@ namespace DokuShell {
 			
 			string CompletedString = string.Join("", Pieces);
 			return CompletedString;
-			
-			//return Xml().ToString(SaveOptions.DisableFormatting);
 		}
 		
 		
@@ -292,5 +299,8 @@ namespace DokuShell {
 		}
    
     }*/
+		public RpcMethod () {
+			this.Parameters = new List<RpcParam>();
+		}
 	}
 }

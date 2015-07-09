@@ -5,7 +5,7 @@
 
 	Param (
 		[Parameter(Mandatory=$True,Position=0)]
-		[object]$Object,
+        $Object,
 
 		[Parameter(Mandatory=$False,Position=1)]
 		[string]$DataType = $Object.GetType().Name
@@ -23,8 +23,13 @@
         }
         
         $NewRpcParam          = New-Object -type DokuShell.RpcParam
-        $NewRpcParam.Value    = [string]$Object
-        $NewRpcParam.DataType = $DataType
+        
+        $Value = [string]$Object
+        Write-Verbose "New-RpcParameter: Writing value `"$Value`""
+        $NewRpcParam.Value    = $Value
+
+        Write-Verbose "New-RpcParameter: Write datatype `"$RpcDataType`""
+        $NewRpcParam.DataType = $RpcDataType
 
         return $NewRpcParam
     }

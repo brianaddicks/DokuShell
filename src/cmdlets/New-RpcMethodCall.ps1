@@ -8,14 +8,26 @@
 		[string]$MethodName,
 
 		[Parameter(Mandatory=$False,Position=1)]
-		[array]$Parameters
+		$RpcParameters
 	)
 
     PROCESS {
         
         $NewRpcMethodCall = New-Object -TypeName DokuShell.RpcMethod
+
+        Write-Verbose "New-RpcMethodCall: $MethodName"
         $NewRpcMethodCall.Name = $MethodName
-        $NewRpcMethodCall.Parameters = $Parameters
+        
+        foreach ($p in $RpcParameters) {
+            Write-Verbose "New-RpcMethodCall: $($p.DataType): $($p.Value)"
+            
+        }
+
+        $NewRpcMethodCall.Parameters = $RpcParameters
+
+        $Global:TestRpcParameters = $RpcParameters
+
+        $global:TestRpcMethodCall = $NewRpcMethodCall
 
         return $NewRpcMethodCall
     }
