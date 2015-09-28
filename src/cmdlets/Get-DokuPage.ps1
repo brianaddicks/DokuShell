@@ -8,28 +8,27 @@ function Get-DokuPage {
 		[string]$Page
 	)
 
-    PROCESS {
-        $MethodName = 'wiki.getPage'
+  PROCESS {
 
-        $RpcParams = @()
-        $RpcParams += New-RpcParameter $Page
-        $Global:TestRpcParams = $RpcParams
+    $MethodName = 'wiki.getPage'
 
-        $MethodCall = New-RpcMethodCall $MethodName $RpcParams
+    $RpcParams = @()
+    $RpcParams += New-RpcParameter $Page
+    $Global:TestRpcParams = $RpcParams
 
-        $RestParams  = @{}
-        $RestParams += @{'Uri'             = $Global:DokuWiki.ApiUrl }
-        $RestParams += @{'Body'            = $MethodCall.PrintPlainXml() }
-        $RestParams += @{'ContentType'     = 'xml' }
-        $RestParams += @{'Method'          = 'post' }
-        $RestParams += @{'WebSession'      = $Global:MySession }
+    $MethodCall = New-RpcMethodCall $MethodName $RpcParams
 
-        $Request = Invoke-RestMethod @RestParams
+    $RestParams  = @{}
+    $RestParams += @{'Uri'             = $Global:DokuWiki.ApiUrl }
+    $RestParams += @{'Body'            = $MethodCall.PrintPlainXml() }
+    $RestParams += @{'ContentType'     = 'application/xml' }
+    $RestParams += @{'Method'          = 'post' }
+    $RestParams += @{'WebSession'      = $Global:MySession }
 
-        
+    $Request = Invoke-RestMethod @RestParams    
 
 		if (!$Quiet) {
 			return $Request
 		}
-    }
+  }
 }
