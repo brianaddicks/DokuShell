@@ -152,7 +152,7 @@ $CSharpOutput += $CSharpContent
 $CSharpOutput += '}'
 
 $CsOutput += [string]::join("`n",$CSharpOutput)
-$CsOutput | Out-File $CsOutputFile -Force
+$CsOutput | Out-File $CsOutputFile -Force -Encoding UTF8
 
 
 Add-Type -ReferencedAssemblies @(
@@ -198,7 +198,7 @@ $Output += $Footer
 ###############################################################################
 # Output File
 
-$Output | Out-File $OutputFile -Force
+$Output | Out-File $OutputFile -Force -Encoding UTF8
 
 if ($PushToStrap) {
     $FilesToZip = ls "$PSScriptRoot\dokushell*" -Exclude *.zip

@@ -15,12 +15,15 @@ function Connect-Dokuwiki {
 		[ValidatePattern("\d+\.\d+\.\d+\.\d+|(\w\.)+\w")]
 		[string]$Host,
 
-        [Parameter(ParameterSetName="credential",Mandatory=$True,Position=1)]
-        [pscredential]$Credential,
+    [Parameter(ParameterSetName="credential",Mandatory=$True,Position=1)]
+    [pscredential]$Credential,
 
 		[Parameter(Mandatory=$False,Position=2)]
 		[int]$Port = $null,
 
+		[Parameter(Mandatory=$False,Position=2)]
+		[string]$WebRoot = "",
+    
 		[Parameter(Mandatory=$False)]
 		[alias('http')]
 		[switch]$HttpOnly,
@@ -30,7 +33,7 @@ function Connect-Dokuwiki {
 		[switch]$Quiet
 	)
 
-    BEGIN {
+  BEGIN {
 
 		if ($HttpOnly) {
 			$Protocol = "http"
@@ -38,44 +41,44 @@ function Connect-Dokuwiki {
 		} else {
 			$Protocol = "https"
 			if (!$Port) { $Port = 443 }
+    }
 			
 			$global:Dokuwiki = New-Object DokuShell.Server
 			
-            $global:Dokuwiki.Protocol = $Protocol
+      $global:Dokuwiki.Protocol = $Protocol
 			$global:Dokuwiki.Host     = $Host
 			$global:Dokuwiki.Port     = $Port
+      $global:Dokuwiki.WebRoot  = $WebRoot.trim('/')
 
-            $UserName = $Credential.UserName
-            $Password = $Credential.getnetworkcredential().password
+      $UserName = $Credential.UserName
+      $Password = $Credential.getnetworkcredential().password
 			
 			$global:Dokuwiki.OverrideValidation()
-		}
-    }
+      
+  }
 
-    PROCESS {
+  PROCESS {
         
-        $Params = @()
-        $Params += New-RpcParameter $UserName
-        $Params += New-RpcParameter $Password
-        $global:params = $Params
+    $Params = @()
+    $Params += New-RpcParameter $UserName
+    $Params += New-RpcParameter $Password
+    $global:params = $Params
 
-        $MethodCall = New-RpcMethodCall "dokuwiki.login" $Params
+    $MethodCall = New-RpcMethodCall "dokuwiki.login" $Params
 
-        $RestParams  = @{}
-        $RestParams += @{'Uri'             = $Global:DokuWiki.ApiUrl }
-        $RestParams += @{'Body'            = $MethodCall.PrintPlainXml() }
-        $RestParams += @{'ContentType'     = 'xml' }
-        $RestParams += @{'Method'          = 'post' }
-        $RestParams += @{'SessionVariable' = "Global:MySession" }
+    $RestParams  = @{}
+    $RestParams += @{'Uri'             = $Global:DokuWiki.ApiUrl }
+    $RestParams += @{'Body'            = $MethodCall.PrintPlainXml() }
+    $RestParams += @{'ContentType'     = 'application/xml' }
+    $RestParams += @{'Method'          = 'post' }
+    $RestParams += @{'SessionVariable' = "Global:MySession" }
 
-        $Login = Invoke-RestMethod @RestParams
-
-        
+    $Login = Invoke-RestMethod @RestParams
 
 		if (!$Quiet) {
 			return $Login
 		}
-    }
+  }
 }
 
 ###############################################################################
@@ -91,30 +94,29 @@ function Get-DokuPage {
 		[string]$Page
 	)
 
-    PROCESS {
-        $MethodName = 'wiki.getPage'
+  PROCESS {
 
-        $RpcParams = @()
-        $RpcParams += New-RpcParameter $Page
-        $Global:TestRpcParams = $RpcParams
+    $MethodName = 'wiki.getPage'
 
-        $MethodCall = New-RpcMethodCall $MethodName $RpcParams
+    $RpcParams = @()
+    $RpcParams += New-RpcParameter $Page
+    $Global:TestRpcParams = $RpcParams
 
-        $RestParams  = @{}
-        $RestParams += @{'Uri'             = $Global:DokuWiki.ApiUrl }
-        $RestParams += @{'Body'            = $MethodCall.PrintPlainXml() }
-        $RestParams += @{'ContentType'     = 'xml' }
-        $RestParams += @{'Method'          = 'post' }
-        $RestParams += @{'WebSession'      = $Global:MySession }
+    $MethodCall = New-RpcMethodCall $MethodName $RpcParams
 
-        $Request = Invoke-RestMethod @RestParams
+    $RestParams  = @{}
+    $RestParams += @{'Uri'             = $Global:DokuWiki.ApiUrl }
+    $RestParams += @{'Body'            = $MethodCall.PrintPlainXml() }
+    $RestParams += @{'ContentType'     = 'application/xml' }
+    $RestParams += @{'Method'          = 'post' }
+    $RestParams += @{'WebSession'      = $Global:MySession }
 
-        
+    $Request = Invoke-RestMethod @RestParams    
 
 		if (!$Quiet) {
 			return $Request
 		}
-    }
+  }
 }
 
 ###############################################################################
@@ -143,14 +145,14 @@ function New-RpcMethodCall {
         foreach ($p in $RpcParameters) {
             Write-Verbose "New-RpcMethodCall: $($p.DataType): $($p.Value)"
             Write-Verbose $p.Gettype()
-            #$NewRpcMethodCall.Parameters += $p
+            $NewRpcMethodCall.Parameters.Add($p)
         }
 
-        $NewRpcMethodCall.Parameters = $RpcParameters
+        #$NewRpcMethodCall.Parameters = $RpcParameters
 
-        $Global:TestRpcParameters = $RpcParameters
+        #$Global:TestRpcParameters = $RpcParameters
 
-        $global:TestRpcMethodCall = $NewRpcMethodCall
+        #$global:TestRpcMethodCall = $NewRpcMethodCall
 
         return $NewRpcMethodCall
     }
@@ -195,6 +197,47 @@ function New-RpcParameter {
         return $NewRpcParam
     }
 }
+
+###############################################################################
+# Set-DokuPage
+
+
+function Set-DokuPage {
+  [CmdletBinding()]
+	<#
+	#>
+
+	Param (
+		[Parameter(Mandatory=$True,Position=0)]
+		[string]$Page,
+    [Parameter(Mandatory=$True,Position=1)]
+		[string]$Content
+	)
+
+    PROCESS {
+      $MethodName = 'wiki.putPage'
+
+      $RpcParams = @()
+      $RpcParams += New-RpcParameter $Page
+      $RpcParams += New-RpcParameter $Content
+
+      $MethodCall = New-RpcMethodCall $MethodName $RpcParams
+
+      $RestParams  = @{}
+      $RestParams += @{'Uri'             = $Global:DokuWiki.ApiUrl }
+      $RestParams += @{'Body'            = $MethodCall.PrintPlainXml() }
+      $RestParams += @{'ContentType'     = 'application/xml' }
+      $RestParams += @{'Method'          = 'post' }
+      $RestParams += @{'WebSession'      = $Global:MySession }
+
+      $Request = Invoke-RestMethod @RestParams
+  
+      if (!$Quiet) {
+        return $Request.methodResponse.params.param.value.boolean
+      }
+    }
+}
+
 
 ###############################################################################
 ## Start Helper Functions
