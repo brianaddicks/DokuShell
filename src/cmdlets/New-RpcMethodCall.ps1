@@ -1,4 +1,4 @@
-﻿function New-RpcMethodCall {
+function New-RpcMethodCall {
     [CmdletBinding()]
 	<#
 	#>

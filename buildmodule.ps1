@@ -1,4 +1,4 @@
-﻿[CmdletBinding()]
+[CmdletBinding()]
 Param (
     [Parameter(Mandatory=$False,Position=0)]
 	[switch]$PushToStrap
