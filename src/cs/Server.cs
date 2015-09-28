@@ -32,12 +32,16 @@ namespace DokuShell {
         public string User { get; set; }
         public string Password { get; set; }
         public string Protocol { get; set; }
+        public string WebRoot { get; set; }
 
         public XmlDocument LastXmlResult { get; set; }
 
         public string ApiUrl {
             get {
-                if ( !string.IsNullOrEmpty( this.Protocol ) && !string.IsNullOrEmpty( this.Host ) && this.Port > 0 ) {
+                if ( !string.IsNullOrEmpty( this.Protocol ) && !string.IsNullOrEmpty( this.Host ) && this.Port > 0 && !string.IsNullOrEmpty( this.WebRoot ) ) {
+                    return this.Protocol + "://" + this.Host + ":" + this.Port + "/" + this.WebRoot + "/lib/exe/xmlrpc.php";
+                }
+                else if ( !string.IsNullOrEmpty( this.Protocol ) && !string.IsNullOrEmpty( this.Host ) && this.Port > 0 ) {
                     return this.Protocol + "://" + this.Host + ":" + this.Port + "/lib/exe/xmlrpc.php";
                 } else {
                     return null;
