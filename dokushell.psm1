@@ -1,9 +1,54 @@
-###############################################################################
+﻿###############################################################################
 ## Start Powershell Cmdlets
 ###############################################################################
 
 ###############################################################################
 # Connect-Dokuwiki
+
+function Get-DokuWikiResponseOrError {
+  [CmdletBinding()]
+  Param (
+		[Parameter(Mandatory=$True,Position=0)]
+		[Object]$Response
+	)
+
+  If ($Response.GetType().Name -eq "string") {
+    $XmlHeaderPos = $Response.IndexOf('<?xml')
+    $Response = [xml] $Response.Substring($XmlHeaderPos, $Response.Length - $XmlHeaderPos)
+  }
+
+  If ($Response.GetType().Name -ne "XmlDocument") {
+    Write-Error "DokuWiki response is not an xml structure"
+  }
+
+  If ($Response.methodResponse -eq $null) {
+    Write-Error "DokuWiki response has no methodResponse" -ErrorAction Stop
+  }
+
+  # If we have a fault, we want to throw an exception
+  If ($Response.methodResponse.fault) {
+    If ($Response.methodResponse.fault.value.struct.member.count -gt 1) {
+      $FailureCode = $Response.methodResponse.fault.value.struct.member[0].value.InnerText
+      $FailureMessage = $Response.methodResponse.fault.value.struct.member[1].value.InnerText
+      Write-Error "Dokuwiki Error Response: [$FailureCode] $FailureMessage" -ErrorAction Stop
+    }
+    Else {
+      Write-Error "DokuWiki returned a fault but the format could not be identified." -ErrorAction Stop
+    }
+  }
+
+  If ($Response.methodResponse.params.param.value.boolean -ne $null) {
+    Return $Response.methodResponse.params.param.value.boolean -eq 1
+  }
+
+  If ($Response.methodResponse.params.param.value.string -ne $null) {
+    Return $Response.methodResponse.params.param.value.string
+  }
+
+  Write-Warning "DokuWiki Response has an unknown format, that could be identified."
+  Return $Response
+
+}
 
 function Connect-Dokuwiki {
     [CmdletBinding()]
@@ -76,7 +121,7 @@ function Connect-Dokuwiki {
     $Login = Invoke-RestMethod @RestParams
 
 		if (!$Quiet) {
-			return $Login
+			return Get-DokuWikiResponseOrError -Response $Login -ErrorAction Stop
 		}
   }
 }
@@ -100,7 +145,6 @@ function Get-DokuPage {
 
     $RpcParams = @()
     $RpcParams += New-RpcParameter $Page
-    $Global:TestRpcParams = $RpcParams
 
     $MethodCall = New-RpcMethodCall $MethodName $RpcParams
 
@@ -114,7 +158,7 @@ function Get-DokuPage {
     $Request = Invoke-RestMethod @RestParams    
 
 		if (!$Quiet) {
-			return $Request
+			return Get-DokuWikiResponseOrError -Response $Request -ErrorAction Stop
 		}
   }
 }
@@ -223,9 +267,11 @@ function Set-DokuPage {
 
       $MethodCall = New-RpcMethodCall $MethodName $RpcParams
 
+      $EncodedXml = Get-SafeXmlSpecialCharacters -Content $MethodCall.PrintPlainXml()
+
       $RestParams  = @{}
       $RestParams += @{'Uri'             = $Global:DokuWiki.ApiUrl }
-      $RestParams += @{'Body'            = $MethodCall.PrintPlainXml() }
+      $RestParams += @{'Body'            = $EncodedXml }
       $RestParams += @{'ContentType'     = 'application/xml' }
       $RestParams += @{'Method'          = 'post' }
       $RestParams += @{'WebSession'      = $Global:MySession }
@@ -233,7 +279,7 @@ function Set-DokuPage {
       $Request = Invoke-RestMethod @RestParams
   
       if (!$Quiet) {
-        return $Request.methodResponse.params.param.value.boolean
+        return Get-DokuWikiResponseOrError -Response $Request -ErrorAction Stop
       }
     }
 }
@@ -242,6 +288,13 @@ function Set-DokuPage {
 ###############################################################################
 ## Start Helper Functions
 ###############################################################################
+
+function Get-SafeXmlSpecialCharacters {
+  Param([String] $Content)
+
+  Return $Content -creplace 'Ä','&#196;' -creplace 'Ö','&#214;' -creplace 'Ü','&#220;' -creplace 'ä','&#228;' -creplace 'ö','&#246;' -creplace 'ü','&#252;' -creplace 'ß','&#223;'
+
+}
 
 ###############################################################################
 ## Export Cmdlets
