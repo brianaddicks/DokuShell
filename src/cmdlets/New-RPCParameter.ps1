@@ -1,4 +1,4 @@
-﻿function New-RpcParameter {
+function New-RpcParameter {
     [CmdletBinding()]
 	<#
 	#>

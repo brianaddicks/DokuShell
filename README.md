@@ -1,2 +1,1 @@
-# DokuShell
-Powershell module for access DokuWiki XMLRPC API
+Deprecated - do not use. Use DokuCli instead.

@@ -1,4 +1,4 @@
-﻿function New-RpcMethodCall {
+function New-RpcMethodCall {
     [CmdletBinding()]
 	<#
 	#>
@@ -21,14 +21,14 @@
         foreach ($p in $RpcParameters) {
             Write-Verbose "New-RpcMethodCall: $($p.DataType): $($p.Value)"
             Write-Verbose $p.Gettype()
-            #$NewRpcMethodCall.Parameters += $p
+            $NewRpcMethodCall.Parameters.Add($p)
         }
 
-        $NewRpcMethodCall.Parameters = $RpcParameters
+        #$NewRpcMethodCall.Parameters = $RpcParameters
 
-        $Global:TestRpcParameters = $RpcParameters
+        #$Global:TestRpcParameters = $RpcParameters
 
-        $global:TestRpcMethodCall = $NewRpcMethodCall
+        #$global:TestRpcMethodCall = $NewRpcMethodCall
 
         return $NewRpcMethodCall
     }
